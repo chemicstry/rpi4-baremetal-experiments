@@ -1,0 +1,8 @@
+[workspace]
+
+members = [
+    "bcm-hal",
+    "cortex-a-quickstart",
+    "cortex-a-rt",
+    "primecell-hal",
+]
