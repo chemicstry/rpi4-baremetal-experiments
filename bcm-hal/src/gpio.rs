@@ -1,79 +1,5 @@
 use register::{mmio::*, register_bitfields, register_structs};
 
-
-// GPIO registers.
-//
-// Descriptions taken from
-// - https://github.com/raspberrypi/documentation/files/1888662/BCM2837-ARM-Peripherals.-.Revised.-.V2-1.pdf
-// - https://datasheets.raspberrypi.org/bcm2711/bcm2711-peripherals.pdf
-register_bitfields! {
-    u32,
-
-    /// GPIO Function Select 1
-    GPFSEL1 [
-        /// Pin 15
-        FSEL15 OFFSET(15) NUMBITS(3) [
-            Input = 0b000,
-            Output = 0b001,
-            AltFunc0 = 0b100  // PL011 UART RX
-
-        ],
-
-        /// Pin 14
-        FSEL14 OFFSET(12) NUMBITS(3) [
-            Input = 0b000,
-            Output = 0b001,
-            AltFunc0 = 0b100  // PL011 UART TX
-        ]
-    ],
-
-    /// GPIO Pull-up/down Register
-    ///
-    /// BCM2837 only.
-    GPPUD [
-        /// Controls the actuation of the internal pull-up/down control line to ALL the GPIO pins.
-        PUD OFFSET(0) NUMBITS(2) [
-            Off = 0b00,
-            PullDown = 0b01,
-            PullUp = 0b10
-        ]
-    ],
-
-    /// GPIO Pull-up/down Clock Register 0
-    ///
-    /// BCM2837 only.
-    GPPUDCLK0 [
-        /// Pin 15
-        PUDCLK15 OFFSET(15) NUMBITS(1) [
-            NoEffect = 0,
-            AssertClock = 1
-        ],
-
-        /// Pin 14
-        PUDCLK14 OFFSET(14) NUMBITS(1) [
-            NoEffect = 0,
-            AssertClock = 1
-        ]
-    ],
-
-    /// GPIO Pull-up / Pull-down Register 0
-    ///
-    /// BCM2711 only.
-    GPIO_PUP_PDN_CNTRL_REG0 [
-        /// Pin 15
-        GPIO_PUP_PDN_CNTRL15 OFFSET(30) NUMBITS(2) [
-            NoResistor = 0b00,
-            PullUp = 0b01
-        ],
-
-        /// Pin 14
-        GPIO_PUP_PDN_CNTRL14 OFFSET(28) NUMBITS(2) [
-            NoResistor = 0b00,
-            PullUp = 0b01
-        ]
-    ]
-}
-
 /// Possibles values for the FSEL fields in GPFSEL register
 enum GpioMode {
     Input = 0b000,
@@ -87,9 +13,8 @@ enum GpioMode {
 }
 
 /// Possibles values for the GPIO_PUP_PDN_CNTRL fields in GPIO_PUP_PDN_CNTRL_REG register
-#[allow(non_camel_case_types)]
 enum GpioResistor {
-    NoResistor = 0b00,
+    Floating = 0b00,
     PullUp = 0b01,
     PullDown = 0b10,
 }
@@ -141,7 +66,8 @@ impl GPIO {
     ///
     /// # Safety
     ///
-    /// - The user must ensure to provide a correct MMIO start address.
+    /// - The user must ensure to provide a correct MMIO base address.
+    /// - There should be no aliases to this address.
     pub unsafe fn new(base_addr: usize) -> Self {
         Self {
             base_addr,
@@ -206,4 +132,12 @@ impl GPIO {
 
         self.disable_pud_14_15_bcm2711();
     }
+}
+
+pub struct Output;
+pub struct Input;
+
+pub struct Pin<MODE, PUD> {
+    base_addr: usize,
+    pin: u8,
 }
