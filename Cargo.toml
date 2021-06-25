@@ -1,7 +1,8 @@
 [workspace]
 
 members = [
-    "bcm-hal",
+    "rpi-hal",
+    "rpi-pac",
     "cortex-a-quickstart",
     "cortex-a-rt",
     "primecell-hal",

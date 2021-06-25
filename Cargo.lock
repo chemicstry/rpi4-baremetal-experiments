@@ -3,16 +3,6 @@
 version = 3
 
 [[package]]
-name = "bcm-hal"
-version = "0.1.0"
-dependencies = [
- "cortex-a",
- "embedded-hal",
- "nb 1.0.0",
- "register",
-]
-
-[[package]]
 name = "cortex-a"
 version = "5.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -25,11 +15,11 @@ dependencies = [
 name = "cortex-a-quickstart"
 version = "0.1.0"
 dependencies = [
- "bcm-hal",
  "cortex-a",
  "cortex-a-rt",
  "embedded-hal",
  "panic-halt",
+ "rpi-hal",
 ]
 
 [[package]]
@@ -47,6 +37,15 @@ checksum = "db184d3fa27bc7a2344250394c0264144dfe0bc81a4401801dcb964b8dd172ad"
 dependencies = [
  "nb 0.1.3",
  "void",
+]
+
+[[package]]
+name = "lock_api"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0382880606dff6d15c9476c416d18690b72742aa7b605bb6dd6ec9030fbf07eb"
+dependencies = [
+ "scopeguard",
 ]
 
 [[package]]
@@ -88,6 +87,31 @@ checksum = "f4a247de29ab7cc8f5006cfe775c4a81c704f9914c5e2a79696862e643135433"
 dependencies = [
  "tock-registers",
 ]
+
+[[package]]
+name = "rpi-hal"
+version = "0.1.0"
+dependencies = [
+ "cortex-a",
+ "embedded-hal",
+ "lock_api",
+ "nb 1.0.0",
+ "register",
+ "rpi-pac",
+]
+
+[[package]]
+name = "rpi-pac"
+version = "0.1.0"
+dependencies = [
+ "register",
+]
+
+[[package]]
+name = "scopeguard"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
 
 [[package]]
 name = "tock-registers"

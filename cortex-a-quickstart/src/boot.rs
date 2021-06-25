@@ -16,4 +16,3 @@ pub unsafe fn _start_rust() -> ! {
     //zero_bss();
     main();
 }
-

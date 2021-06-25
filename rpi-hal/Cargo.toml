@@ -1,5 +1,5 @@
 [package]
-name = "bcm-hal"
+name = "rpi-hal"
 version = "0.1.0"
 authors = ["Intel <chemicstry@gmail.com>"]
 edition = "2018"
@@ -9,5 +9,10 @@ edition = "2018"
 [dependencies]
 embedded-hal = "0.2"
 register = "1.0"
+rpi-pac = { path = "../rpi-pac" }
+lock_api = "0.4"
 cortex-a = "5.1"
 nb = "1.0"
+
+[features]
+rpi4 = ["rpi-pac/rpi4"]

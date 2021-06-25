@@ -9,8 +9,8 @@
 //! - <https://github.com/raspberrypi/documentation/files/1888662/BCM2837-ARM-Peripherals.-.Revised.-.V2-1.pdf>
 //! - <https://developer.arm.com/documentation/ddi0183/latest>
 
-use register::{mmio::*, register_bitfields, register_structs};
 use embedded_hal as hal;
+use register::{mmio::*, register_bitfields, register_structs};
 
 // PL011 UART registers.
 //
@@ -164,8 +164,7 @@ impl core::ops::Deref for PL011Uart {
 }
 
 #[derive(Debug)]
-pub enum PL011UartError {
-}
+pub enum PL011UartError {}
 
 pub type Result<T> = nb::Result<T, PL011UartError>;
 
@@ -176,9 +175,7 @@ impl PL011Uart {
     ///
     /// - The user must ensure to provide a correct MMIO start address.
     pub const unsafe fn new(base_addr: usize) -> Self {
-        Self {
-            base_addr,
-        }
+        Self { base_addr }
     }
 
     fn ptr(&self) -> *const RegisterBlock {
@@ -228,20 +225,18 @@ impl PL011Uart {
         // Set the baud rate, 8N1 and FIFO enabled.
         self.IBRD.write(IBRD::BAUD_DIVINT.val(3));
         self.FBRD.write(FBRD::BAUD_DIVFRAC.val(16));
-        self
-            .LCR_H
+        self.LCR_H
             .write(LCR_H::WLEN::EightBit + LCR_H::FEN::FifosEnabled);
 
         // Turn the UART on.
-        self
-            .CR
+        self.CR
             .write(CR::UARTEN::Enabled + CR::TXE::Enabled + CR::RXE::Enabled);
     }
 
     /// Send a character.
     pub fn write_byte(&mut self, b: u8) -> Result<()> {
         if self.FR.matches_all(FR::TXFF::SET) {
-            return Err(nb::Error::WouldBlock)
+            return Err(nb::Error::WouldBlock);
         }
 
         // Write the character to the buffer.
@@ -254,7 +249,7 @@ impl PL011Uart {
     pub fn flush_tx(&self) -> Result<()> {
         // Check if busy
         if self.FR.matches_all(FR::BUSY::SET) {
-            return Err(nb::Error::WouldBlock)
+            return Err(nb::Error::WouldBlock);
         }
 
         Ok(())
@@ -264,7 +259,7 @@ impl PL011Uart {
     pub fn read_byte(&mut self) -> Result<u8> {
         // If RX FIFO is empty,
         if self.FR.matches_all(FR::RXFE::SET) {
-            return Err(nb::Error::WouldBlock)
+            return Err(nb::Error::WouldBlock);
         }
 
         // Read one character.

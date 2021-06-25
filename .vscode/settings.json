@@ -1,0 +1,5 @@
+{
+    "rust-analyzer.cargo.features": [
+        "rpi-hal/rpi4"
+    ]
+}
