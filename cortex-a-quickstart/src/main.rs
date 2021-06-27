@@ -4,6 +4,8 @@
 
 use null_lock::NullLock;
 use rpi_hal::gpio::GpioParts;
+use rpi_hal::prelude::*;
+use rpi_hal::serial::Serial;
 
 // use rpi_hal::{gpio::Gpio, uart::PL011Uart};
 // use cortex_a::asm;
@@ -24,23 +26,15 @@ fn main() -> ! {
     let pins = GpioParts::split(&gpio);
 
     // Setup UART pins
-    pins.gpio14.into_alt_func0().into_floating();
-    pins.gpio15.into_alt_func0().into_floating();
+    let tx = pins.gpio14.into_alt_func0().into_floating();
+    let rx = pins.gpio15.into_alt_func0().into_floating();
 
-    //println!("Hello, world!");
-    // let mut uart = unsafe {
-    //     let mut gpio = GPIO::new(memory::mmio::GPIO_START);
-    //     let mut uart = PL011Uart::new(memory::mmio::PL011_UART_START);
-    //     uart.init();
-    //     gpio.map_pl011_uart();
-    //     uart
-    // };
+    let uart_config = rpi_hal::serial::config::Config::default().baudrate(921200.bps());
+    let mut uart = Serial::new(dp.uart0, (tx, rx), uart_config, 48.mhz().into());
 
-    // for byte in b"Hello, world!" {
-    //     // NOTE `block!` blocks until `serial.write()` completes and returns
-    //     // `Result<(), Error>`
-    //     uart.write(*byte);
-    // }
+    for byte in b"Hello, world!" {
+        nb::block!(uart.write(*byte)).unwrap();
+    }
 
     loop {}
 }

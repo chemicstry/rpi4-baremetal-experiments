@@ -45,7 +45,7 @@ pub fn bss_range_inclusive() -> RangeInclusive<*mut u64> {
 ///
 /// # Safety
 ///
-/// - Must only be called pre `kernel_init()`.
+/// - Must only be called once on startup
 #[inline(always)]
 pub unsafe fn zero_bss() {
     zero_volatile(bss_range_inclusive());

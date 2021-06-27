@@ -5,5 +5,4 @@ members = [
     "rpi-pac",
     "cortex-a-quickstart",
     "cortex-a-rt",
-    "primecell-hal",
 ]
