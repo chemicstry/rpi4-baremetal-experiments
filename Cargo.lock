@@ -18,6 +18,7 @@ dependencies = [
  "cortex-a",
  "cortex-a-rt",
  "embedded-hal",
+ "lock_api",
  "panic-halt",
  "rpi-hal",
 ]

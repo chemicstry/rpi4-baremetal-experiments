@@ -2,3 +2,5 @@
 
 pub mod gpio;
 pub mod rpi;
+
+pub use rpi::*;
