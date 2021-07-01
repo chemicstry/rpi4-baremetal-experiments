@@ -20,6 +20,8 @@ mod rpi4 {
         pub const UART3_START: usize = START + UART3_OFFSET;
         pub const UART4_START: usize = START + UART4_OFFSET;
         pub const UART5_START: usize = START + UART5_OFFSET;
+        pub const GICD_START: usize = 0xFF84_1000;
+        pub const GICC_START: usize = 0xFF84_2000;
     }
 
     pub struct Gpio {
@@ -153,6 +155,50 @@ mod rpi4 {
             unsafe { &*Uart5::ptr() }
         }
     }
+
+    pub struct Gicc {
+        pub(crate) _marker: PhantomData<*const ()>,
+    }
+
+    unsafe impl Send for Gicc {}
+
+    impl Gicc {
+        #[inline(always)]
+        pub const fn ptr() -> *const uart::RegisterBlock {
+            mmio::GICC_START as *const _
+        }
+    }
+
+    impl Deref for Gicc {
+        type Target = uart::RegisterBlock;
+
+        #[inline(always)]
+        fn deref(&self) -> &Self::Target {
+            unsafe { &*Gicc::ptr() }
+        }
+    }
+
+    pub struct Gicd {
+        pub(crate) _marker: PhantomData<*const ()>,
+    }
+
+    unsafe impl Send for Gicd {}
+
+    impl Gicd {
+        #[inline(always)]
+        pub const fn ptr() -> *const uart::RegisterBlock {
+            mmio::GICD_START as *const _
+        }
+    }
+
+    impl Deref for Gicd {
+        type Target = uart::RegisterBlock;
+
+        #[inline(always)]
+        fn deref(&self) -> &Self::Target {
+            unsafe { &*Gicd::ptr() }
+        }
+    }
 }
 
 #[cfg(feature = "rpi4")]
@@ -171,6 +217,10 @@ pub struct Peripherals {
     pub uart4: Uart4,
     #[cfg(feature = "rpi4")]
     pub uart5: Uart5,
+    #[cfg(feature = "rpi4")]
+    pub gicc: Gicc,
+    #[cfg(feature = "rpi4")]
+    pub gicd: Gicd,
 }
 
 impl Peripherals {
@@ -203,6 +253,14 @@ impl Peripherals {
             },
             #[cfg(feature = "rpi4")]
             uart5: Uart5 {
+                _marker: PhantomData,
+            },
+            #[cfg(feature = "rpi4")]
+            gicc: Gicc {
+                _marker: PhantomData,
+            },
+            #[cfg(feature = "rpi4")]
+            gicd: Gicd {
                 _marker: PhantomData,
             },
         }
