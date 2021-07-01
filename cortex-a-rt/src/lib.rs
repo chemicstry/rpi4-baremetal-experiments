@@ -1,31 +1,35 @@
 #![feature(global_asm)]
 #![no_std]
 
-mod memory;
-use crate::memory::zero_bss;
+pub mod memory;
 
-// Initial boot handled by assembly
-global_asm!(include_str!("boot.s"));
+#[cfg(feature = "entry")]
+pub mod entry {
+    use crate::memory::zero_bss;
 
-#[no_mangle]
-#[link_section = ".text._start_arguments"]
-pub static BOOT_CORE_ID: u64 = 0;
+    // Initial boot handled by assembly
+    global_asm!(include_str!("boot.s"));
 
-#[no_mangle]
-pub unsafe extern "C" fn _start_rust() -> ! {
-    extern "Rust" {
-        fn main() -> !;
+    #[no_mangle]
+    #[link_section = ".text._start_arguments"]
+    pub static BOOT_CORE_ID: u64 = 0;
+
+    #[no_mangle]
+    pub unsafe extern "C" fn _start_rust() -> ! {
+        extern "Rust" {
+            fn main() -> !;
+        }
+
+        zero_bss();
+        main();
     }
 
-    zero_bss();
-    main();
-}
+    // Entry point is _start function in boot.s
+    #[doc(hidden)]
+    #[no_mangle]
+    pub static __RPI_LOAD_ADDR: unsafe extern "C" fn() -> ! = _start;
 
-// Entry point is _start function in boot.s
-#[doc(hidden)]
-#[no_mangle]
-pub static __RPI_LOAD_ADDR: unsafe extern "C" fn() -> ! = _start;
-
-extern "C" {
-    fn _start() -> !;
+    extern "C" {
+        fn _start() -> !;
+    }
 }

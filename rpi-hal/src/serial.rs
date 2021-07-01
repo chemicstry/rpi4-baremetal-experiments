@@ -1,3 +1,6 @@
+use core::fmt;
+
+use nb::block;
 use rpi_pac::{uart::*, Uart0, Uart2, Uart3, Uart4, Uart5};
 
 use crate::{
@@ -334,5 +337,17 @@ where
 
     fn flush(&mut self) -> Result<()> {
         Serial::flush(self)
+    }
+}
+
+impl<UART, PINS> fmt::Write for Serial<UART, PINS>
+where
+    Serial<UART, PINS>: embedded_hal::serial::Write<u8>,
+{
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        s.as_bytes()
+            .iter()
+            .try_for_each(|c| block!(embedded_hal::serial::Write::write(self, *c)))
+            .map_err(|_| fmt::Error)
     }
 }

@@ -1,0 +1,8 @@
+[target.aarch64-unknown-none-softfloat]
+rustflags = [
+  "-C", "link-arg=-Tlink_custom.x",
+  "-C", "target-cpu=cortex-a72",
+]
+
+[build]
+target = "aarch64-unknown-none-softfloat"

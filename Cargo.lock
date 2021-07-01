@@ -3,6 +3,12 @@
 version = 3
 
 [[package]]
+name = "cfg-if"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
+
+[[package]]
 name = "cortex-a"
 version = "5.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -32,6 +38,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "crc16"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "338089f42c427b86394a5ee60ff321da23a5c89c9d89514c829687b26359fcff"
+
+[[package]]
 name = "embedded-hal"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -48,6 +60,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0382880606dff6d15c9476c416d18690b72742aa7b605bb6dd6ec9030fbf07eb"
 dependencies = [
  "scopeguard",
+]
+
+[[package]]
+name = "log"
+version = "0.4.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "51b9bbe6c47d51fc3e1a9b945965946b4c44142ab8792c50835a980d362c2710"
+dependencies = [
+ "cfg-if",
 ]
 
 [[package]]
@@ -78,6 +99,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f4a247de29ab7cc8f5006cfe775c4a81c704f9914c5e2a79696862e643135433"
 dependencies = [
  "tock-registers",
+]
+
+[[package]]
+name = "rpi-bootloader"
+version = "0.1.0"
+dependencies = [
+ "cortex-a",
+ "cortex-a-rt",
+ "embedded-hal",
+ "lock_api",
+ "nb 1.0.0",
+ "panic-halt",
+ "rpi-hal",
+ "xmodem",
 ]
 
 [[package]]
@@ -116,3 +151,14 @@ name = "void"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a02e4885ed3bc0f2de90ea6dd45ebcbb66dacffe03547fadbb0eeae2770887d"
+
+[[package]]
+name = "xmodem"
+version = "0.3.0"
+source = "git+https://github.com/chemicstry/xmodem.rs#8ac23c9997d9320ea726b4dc809fa89bc6fee714"
+dependencies = [
+ "crc16",
+ "embedded-hal",
+ "log",
+ "nb 1.0.0",
+]

@@ -8,3 +8,8 @@ edition = "2018"
 
 [dependencies]
 cortex-a = "5.1"
+
+[features]
+default = ["entry"]
+# Generate entry code which calls into main()
+entry = []

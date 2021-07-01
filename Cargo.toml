@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
+    "rpi-bootloader",
     "rpi-hal",
     "rpi-pac",
     "cortex-a-quickstart",
