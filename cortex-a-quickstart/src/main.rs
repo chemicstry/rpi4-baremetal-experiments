@@ -14,7 +14,6 @@ use rpi_hal::serial::Serial;
 extern crate cortex_a_rt;
 extern crate panic_halt;
 
-mod boot;
 mod null_lock;
 
 #[no_mangle]
