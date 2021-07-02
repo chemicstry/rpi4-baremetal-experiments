@@ -4,17 +4,17 @@ register_bitfields! {
     u32,
 
     /// Distributor Control Register
-    CTLR [
+    pub CTLR [
         Enable OFFSET(0) NUMBITS(1) []
     ],
 
     /// Interrupt Controller Type Register
-    TYPER [
+    pub TYPER [
         ITLinesNumber OFFSET(0)  NUMBITS(5) []
     ],
 
     /// Interrupt Processor Targets Registers
-    ITARGETSR [
+    pub ITARGETSR [
         Offset3 OFFSET(24) NUMBITS(8) [],
         Offset2 OFFSET(16) NUMBITS(8) [],
         Offset1 OFFSET(8)  NUMBITS(8) [],
@@ -23,7 +23,7 @@ register_bitfields! {
 }
 
 register_structs! {
-    SharedRegisterBlock {
+    pub SharedRegisterBlock {
         (0x000 => pub ctlr: ReadWrite<u32, CTLR::Register>),
         (0x004 => pub typer: ReadOnly<u32, TYPER::Register>),
         (0x008 => _reserved1),
@@ -35,7 +35,7 @@ register_structs! {
 }
 
 register_structs! {
-    BankedRegisterBlock {
+    pub BankedRegisterBlock {
         (0x000 => _reserved1),
         (0x100 => pub isenabler: ReadWrite<u32>),
         (0x104 => _reserved2),

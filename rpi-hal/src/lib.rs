@@ -1,5 +1,6 @@
 #![no_std]
 
+pub mod gicv2;
 pub mod gpio;
 pub mod serial;
 pub mod time;

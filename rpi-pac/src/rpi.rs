@@ -2,7 +2,7 @@ use core::marker::PhantomData;
 
 #[cfg(feature = "rpi4")]
 mod rpi4 {
-    use crate::{gpio, uart};
+    use crate::{gpio, uart, gicv2};
     use core::{marker::PhantomData, ops::Deref};
 
     pub mod mmio {
@@ -164,13 +164,13 @@ mod rpi4 {
 
     impl Gicc {
         #[inline(always)]
-        pub const fn ptr() -> *const uart::RegisterBlock {
+        pub const fn ptr() -> *const gicv2::gicc::RegisterBlock {
             mmio::GICC_START as *const _
         }
     }
 
     impl Deref for Gicc {
-        type Target = uart::RegisterBlock;
+        type Target = gicv2::gicc::RegisterBlock;
 
         #[inline(always)]
         fn deref(&self) -> &Self::Target {
@@ -178,25 +178,47 @@ mod rpi4 {
         }
     }
 
-    pub struct Gicd {
+    pub struct GicdShared {
         pub(crate) _marker: PhantomData<*const ()>,
     }
 
-    unsafe impl Send for Gicd {}
+    unsafe impl Send for GicdShared {}
 
-    impl Gicd {
+    impl GicdShared {
         #[inline(always)]
-        pub const fn ptr() -> *const uart::RegisterBlock {
+        pub const fn ptr() -> *const gicv2::gicd::SharedRegisterBlock {
             mmio::GICD_START as *const _
         }
     }
 
-    impl Deref for Gicd {
-        type Target = uart::RegisterBlock;
+    impl Deref for GicdShared {
+        type Target = gicv2::gicd::SharedRegisterBlock;
 
         #[inline(always)]
         fn deref(&self) -> &Self::Target {
-            unsafe { &*Gicd::ptr() }
+            unsafe { &*GicdShared::ptr() }
+        }
+    }
+
+    pub struct GicdBanked {
+        pub(crate) _marker: PhantomData<*const ()>,
+    }
+
+    unsafe impl Send for GicdBanked {}
+
+    impl GicdBanked {
+        #[inline(always)]
+        pub const fn ptr() -> *const gicv2::gicd::BankedRegisterBlock {
+            mmio::GICD_START as *const _
+        }
+    }
+
+    impl Deref for GicdBanked {
+        type Target = gicv2::gicd::BankedRegisterBlock;
+
+        #[inline(always)]
+        fn deref(&self) -> &Self::Target {
+            unsafe { &*GicdBanked::ptr() }
         }
     }
 }
@@ -220,7 +242,9 @@ pub struct Peripherals {
     #[cfg(feature = "rpi4")]
     pub gicc: Gicc,
     #[cfg(feature = "rpi4")]
-    pub gicd: Gicd,
+    pub gicd_shared: GicdShared,
+    #[cfg(feature = "rpi4")]
+    pub gicd_banked: GicdBanked,
 }
 
 impl Peripherals {
@@ -260,7 +284,11 @@ impl Peripherals {
                 _marker: PhantomData,
             },
             #[cfg(feature = "rpi4")]
-            gicd: Gicd {
+            gicd_shared: GicdShared {
+                _marker: PhantomData,
+            },
+            #[cfg(feature = "rpi4")]
+            gicd_banked: GicdBanked {
                 _marker: PhantomData,
             },
         }
