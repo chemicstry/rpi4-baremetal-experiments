@@ -2,7 +2,7 @@ use core::marker::PhantomData;
 
 #[cfg(feature = "rpi4")]
 mod rpi4 {
-    use crate::{gpio, uart, gicv2};
+    use crate::{gicv2, gpio, uart};
     use core::{marker::PhantomData, ops::Deref};
 
     pub mod mmio {
@@ -239,6 +239,7 @@ pub struct Peripherals {
     pub uart4: Uart4,
     #[cfg(feature = "rpi4")]
     pub uart5: Uart5,
+    // TODO: gicc and gicd_banked should be local per-core peripherals
     #[cfg(feature = "rpi4")]
     pub gicc: Gicc,
     #[cfg(feature = "rpi4")]

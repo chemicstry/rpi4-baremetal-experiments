@@ -26,7 +26,6 @@ dependencies = [
  "embedded-hal",
  "lock_api",
  "nb 1.0.0",
- "panic-halt",
  "rpi-hal",
 ]
 
@@ -35,6 +34,7 @@ name = "cortex-a-rt"
 version = "0.1.0"
 dependencies = [
  "cortex-a",
+ "register",
 ]
 
 [[package]]

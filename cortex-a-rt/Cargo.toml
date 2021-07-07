@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 cortex-a = "5.1"
+register = "1.0"
 
 [features]
 default = ["entry"]

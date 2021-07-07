@@ -1,7 +1,4 @@
-use register::{
-    mmio::ReadWrite,
-    register_structs, register_bitfields,
-};
+use register::{mmio::ReadWrite, register_bitfields, register_structs};
 
 register_bitfields! {
     u32,

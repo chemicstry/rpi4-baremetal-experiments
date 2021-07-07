@@ -18,7 +18,7 @@ mod null_lock;
 
 const UART_BAUD: Bps = Bps(921200);
 const FW_LOAD_ADDR: usize = 0x80000;
-const FW_MAX_SIZE: usize = 32*1024*1024; // 32MB
+const FW_MAX_SIZE: usize = 32 * 1024 * 1024; // 32MB
 
 struct MemWriter {
     addr: usize,
@@ -27,7 +27,10 @@ struct MemWriter {
 
 impl MemWriter {
     unsafe fn new(start_addr: usize, size: usize) -> MemWriter {
-        MemWriter { addr: start_addr, addr_end: start_addr + size }
+        MemWriter {
+            addr: start_addr,
+            addr_end: start_addr + size,
+        }
     }
 }
 
@@ -71,11 +74,11 @@ fn main() -> ! {
             Ok(_) => {
                 writeln!(uart, "Firmware loaded").ok();
                 break;
-            },
+            }
             Err(e) => {
                 writeln!(uart, "Error loading firmware: {:?}", e).ok();
                 continue;
-            },
+            }
         }
     }
 
