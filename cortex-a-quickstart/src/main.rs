@@ -2,7 +2,9 @@
 #![no_std]
 #![feature(global_asm)]
 
+use cortex_a_rt::exception::masking;
 use null_lock::NullLock;
+use rpi_hal::gicv2::{Gicc, Gicd, GicdLocal, IrqNumber, SgiTarget};
 use rpi_hal::gpio::GpioParts;
 use rpi_hal::prelude::*;
 use rpi_hal::serial::Serial;
@@ -32,10 +34,23 @@ fn main() -> ! {
         nb::block!(uart.write(*byte)).unwrap();
     }
 
-    let big_addr: u64 = 9 * 1024 * 1024 * 1024;
-    unsafe { core::ptr::read_volatile(big_addr as *mut u64) };
+    unsafe {
+        masking::local_irq_unmask();
+    }
 
-    panic!("test");
+    let mut gicc = Gicc::new(dp.gicc);
+    //let mut gicd = Gicd::new(dp.gicd_shared);
+    let mut gicd_local = GicdLocal::new(dp.gicd_banked);
+
+    gicc.enable();
+    gicd_local.enable_irq(IrqNumber::new(0));
+    gicd_local.pend_sgi(IrqNumber::new(0), SgiTarget::OnlyCurrent);
+
+    //panic!("test");
+
+    for byte in b"Hello, world!" {
+        nb::block!(uart.write(*byte)).unwrap();
+    }
 
     loop {}
 }

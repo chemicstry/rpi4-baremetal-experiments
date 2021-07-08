@@ -1,5 +1,6 @@
 #![feature(global_asm)]
 #![feature(linkage)]
+#![feature(asm)]
 #![no_std]
 
 use cortex_a::regs::RegisterReadOnly;

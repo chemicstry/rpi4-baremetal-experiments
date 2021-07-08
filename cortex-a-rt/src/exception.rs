@@ -262,3 +262,137 @@ pub unsafe fn handling_init() {
     // Force VBAR update to complete before next instruction.
     barrier::isb(barrier::SY);
 }
+
+pub mod masking {
+    pub mod daif_bits {
+        pub const DEBUG: u8     = 0b1000;
+        pub const SERROR: u8    = 0b0100;
+        pub const IRQ: u8       = 0b0010;
+        pub const FIQ: u8       = 0b0001;
+    }
+
+    /// Unmask debug interrupts (Watchpoint, Breakpoint, and Software Step exceptions) on the executing core.
+    ///
+    /// # Safety
+    ///
+    /// - Changes the HW state of the executing core.
+    #[inline(always)]
+    pub unsafe fn local_debug_unmask() {
+        // It is not needed to place an explicit instruction synchronization barrier after the `msr`.
+        // Quoting the Architecture Reference Manual for ARMv8-A, section C5.1.3:
+        //
+        // "Writes to PSTATE.{PAN, D, A, I, F} occur in program order without the need for additional
+        // synchronization."
+        #[rustfmt::skip]
+        asm!(
+            "msr DAIFClr, {arg}",
+            arg = const daif_bits::DEBUG,
+            options(nomem, nostack, preserves_flags)
+        );
+    }
+
+    /// Mask debug interrupts (Watchpoint, Breakpoint, and Software Step exceptions) on the executing core.
+    ///
+    /// # Safety
+    ///
+    /// - Changes the HW state of the executing core.
+    #[inline(always)]
+    pub unsafe fn local_debug_mask() {
+        #[rustfmt::skip]
+        asm!(
+            "msr DAIFSet, {arg}",
+            arg = const daif_bits::DEBUG,
+            options(nomem, nostack, preserves_flags)
+        );
+    }
+
+    /// Unmask SError interrupts on the executing core.
+    ///
+    /// # Safety
+    ///
+    /// - Changes the HW state of the executing core.
+    #[inline(always)]
+    pub unsafe fn local_serror_unmask() {
+        #[rustfmt::skip]
+        asm!(
+            "msr DAIFClr, {arg}",
+            arg = const daif_bits::SERROR,
+            options(nomem, nostack, preserves_flags)
+        );
+    }
+
+    /// Mask SError interrupts on the executing core.
+    ///
+    /// # Safety
+    ///
+    /// - Changes the HW state of the executing core.
+    #[inline(always)]
+    pub unsafe fn local_serror_mask() {
+        #[rustfmt::skip]
+        asm!(
+            "msr DAIFSet, {arg}",
+            arg = const daif_bits::SERROR,
+            options(nomem, nostack, preserves_flags)
+        );
+    }
+
+    /// Unmask IRQs on the executing core.
+    ///
+    /// # Safety
+    ///
+    /// - Changes the HW state of the executing core.
+    #[inline(always)]
+    pub unsafe fn local_irq_unmask() {
+        #[rustfmt::skip]
+        asm!(
+            "msr DAIFClr, {arg}",
+            arg = const daif_bits::IRQ,
+            options(nomem, nostack, preserves_flags)
+        );
+    }
+
+    /// Mask IRQs on the executing core.
+    ///
+    /// # Safety
+    ///
+    /// - Changes the HW state of the executing core.
+    #[inline(always)]
+    pub unsafe fn local_irq_mask() {
+        #[rustfmt::skip]
+        asm!(
+            "msr DAIFSet, {arg}",
+            arg = const daif_bits::IRQ,
+            options(nomem, nostack, preserves_flags)
+        );
+    }
+
+    /// Unmask FIQs on the executing core.
+    ///
+    /// # Safety
+    ///
+    /// - Changes the HW state of the executing core.
+    #[inline(always)]
+    pub unsafe fn local_fiq_unmask() {
+        #[rustfmt::skip]
+        asm!(
+            "msr DAIFClr, {arg}",
+            arg = const daif_bits::FIQ,
+            options(nomem, nostack, preserves_flags)
+        );
+    }
+
+    /// Mask FIQs on the executing core.
+    ///
+    /// # Safety
+    ///
+    /// - Changes the HW state of the executing core.
+    #[inline(always)]
+    pub unsafe fn local_fiq_mask() {
+        #[rustfmt::skip]
+        asm!(
+            "msr DAIFSet, {arg}",
+            arg = const daif_bits::FIQ,
+            options(nomem, nostack, preserves_flags)
+        );
+    }
+}
