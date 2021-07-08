@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 cortex-a-rt = { path = "../cortex-a-rt" }
 cortex-a = "5.1"
-rpi-hal = { path = "../rpi-hal", features = ["rpi4"] }
+rpi-hal = { path = "../rpi-hal", features = ["rpi4", "panic_uart"] }
 embedded-hal = "0.2"
 lock_api = "0.4"
 nb = "1.0"

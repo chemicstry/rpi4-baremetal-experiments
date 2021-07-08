@@ -16,3 +16,5 @@ nb = "1.0"
 
 [features]
 rpi4 = ["rpi-pac/rpi4"]
+# Implements panic handler over default UART
+panic_uart = []

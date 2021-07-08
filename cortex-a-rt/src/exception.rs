@@ -264,14 +264,14 @@ pub unsafe fn handling_init() {
 }
 
 pub mod masking {
-    use cortex_a::regs::{DAIF, RegisterReadWrite};
+    use cortex_a::regs::{RegisterReadWrite, DAIF};
     use register::LocalRegisterCopy;
 
     pub mod daif_bits {
-        pub const DEBUG: u8     = 0b1000;
-        pub const SERROR: u8    = 0b0100;
-        pub const IRQ: u8       = 0b0010;
-        pub const FIQ: u8       = 0b0001;
+        pub const DEBUG: u8 = 0b1000;
+        pub const SERROR: u8 = 0b0100;
+        pub const IRQ: u8 = 0b0010;
+        pub const FIQ: u8 = 0b0001;
     }
 
     /// Unmask debug interrupts (Watchpoint, Breakpoint, and Software Step exceptions) on the executing core.

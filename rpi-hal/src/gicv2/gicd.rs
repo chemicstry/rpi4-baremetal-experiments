@@ -54,7 +54,12 @@ impl Gicd {
         let mask = mask.0 as u32;
 
         for reg in &self.gicd.itargetsr {
-            reg.write(ITARGETSR::Offset0.val(mask) + ITARGETSR::Offset1.val(mask) + ITARGETSR::Offset2.val(mask) + ITARGETSR::Offset3.val(mask));
+            reg.write(
+                ITARGETSR::Offset0.val(mask)
+                    + ITARGETSR::Offset1.val(mask)
+                    + ITARGETSR::Offset2.val(mask)
+                    + ITARGETSR::Offset3.val(mask),
+            );
         }
     }
 }
@@ -104,6 +109,10 @@ impl GicdLocal {
             SgiTarget::OnlyCurrent => (SGIR::TargetListFilter::OnlyCurrent, CoreMask(0)),
         };
 
-        self.gicd.sgir.write(target_list_filter + SGIR::CPUTargetList.val(mask.0 as u32) + SGIR::SGIINTID.val(irq_num.0));
+        self.gicd.sgir.write(
+            target_list_filter
+                + SGIR::CPUTargetList.val(mask.0 as u32)
+                + SGIR::SGIINTID.val(irq_num.0),
+        );
     }
 }

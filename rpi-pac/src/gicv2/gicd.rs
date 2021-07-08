@@ -1,4 +1,7 @@
-use register::{mmio::{ReadOnly, ReadWrite, WriteOnly}, register_bitfields, register_structs};
+use register::{
+    mmio::{ReadOnly, ReadWrite, WriteOnly},
+    register_bitfields, register_structs,
+};
 
 register_bitfields! {
     u32,
@@ -42,13 +45,13 @@ register_bitfields! {
         /// CPU interface.
         CPUTargetList       OFFSET(16) NUMBITS(8) [],
         /// Implemented only if the GIC includes the Security Extensions.
-        /// 
+        ///
         /// Specifies the required security value of the SGI:
         /// - 0 Forward the SGI specified in the SGIINTID field to a specified CPU interface only if the
         ///   SGI is configured as Group 0 on that interface.
         /// - 1 Forward the SGI specified in the SGIINTID field to a specified CPU interfaces only if
         ///   the SGI is configured as Group 1 on that interface.
-        /// 
+        ///
         /// This field is writable only by a Secure access. Any Non-secure write to the GICD_SGIR generates an
         /// SGI only if the specified SGI is programmed as Group 1, regardless of the value of bit[15] of the write.
         NSATT               OFFSET(15) NUMBITS(1) [],
