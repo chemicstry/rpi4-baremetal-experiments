@@ -18,8 +18,11 @@ fn panic(info: &PanicInfo) -> ! {
     let tx = pins.gpio14.into_alt_func0().into_floating();
     let rx = pins.gpio15.into_alt_func0().into_floating();
 
+    // Initialized by RPi bootloader
+    let uart_freq = 48.mhz().into();
+
     let uart_config = serial::config::Config::default().baudrate(921200.bps());
-    let mut uart = Serial::new(dp.uart0, (tx, rx), uart_config, 48.mhz().into());
+    let mut uart = Serial::new(dp.uart0, (tx, rx), uart_config, uart_freq);
 
     writeln!(uart, "{}", info).ok();
 
