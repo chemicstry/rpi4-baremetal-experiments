@@ -264,6 +264,9 @@ pub unsafe fn handling_init() {
 }
 
 pub mod masking {
+    use cortex_a::regs::{DAIF, RegisterReadWrite};
+    use register::LocalRegisterCopy;
+
     pub mod daif_bits {
         pub const DEBUG: u8     = 0b1000;
         pub const SERROR: u8    = 0b0100;
@@ -394,5 +397,38 @@ pub mod masking {
             arg = const daif_bits::FIQ,
             options(nomem, nostack, preserves_flags)
         );
+    }
+
+    /// Contains the interrupt mask state
+    pub struct DaifState(LocalRegisterCopy<u64, DAIF::Register>);
+
+    impl core::fmt::Debug for DaifState {
+        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            writeln!(f, "Exception handling state:")?;
+            writeln!(f, "    Debug  (D): {}", self.0.is_set(DAIF::D))?;
+            writeln!(f, "    SError (A): {}", self.0.is_set(DAIF::A))?;
+            writeln!(f, "    IRQ    (I): {}", self.0.is_set(DAIF::I))?;
+            writeln!(f, "    FIQ    (F): {}", self.0.is_set(DAIF::F))
+        }
+    }
+
+    /// Returns the current mask state of the executing core
+    ///
+    /// # Safety
+    ///
+    /// - Changes the HW state of the executing core.
+    #[inline(always)]
+    pub unsafe fn local_mask_save() -> DaifState {
+        DaifState(DAIF.extract())
+    }
+
+    /// Restores saved interrupt mask state on the executing core
+    ///
+    /// # Safety
+    ///
+    /// - Changes the HW state of the executing core.
+    #[inline(always)]
+    pub unsafe fn local_mask_restore(state: DaifState) {
+        DAIF.set(state.0.get())
     }
 }
