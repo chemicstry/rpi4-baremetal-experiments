@@ -74,7 +74,7 @@ pub mod entry {
         }
 
         memory::zero_bss();
-        exception::handling_init();
+        exception::han();
 
         main();
     }
