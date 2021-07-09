@@ -2,24 +2,22 @@
 //
 // Copyright (c) 2018-2021 Andre Richter <andre.o.richter@gmail.com>
 
-use core::{cell::UnsafeCell, fmt};
-use cortex_a::{barrier, regs::*};
+use core::fmt;
+use cortex_a::regs::*;
 use register::InMemoryRegister;
+
+use super::handlers::EXCEPTION_HANDLERS;
 
 // Assembly counterpart to this file.
 global_asm!(include_str!("exception.s"));
 
-//--------------------------------------------------------------------------------------------------
-// Private Definitions
-//--------------------------------------------------------------------------------------------------
-
 /// Wrapper struct for memory copy of SPSR_EL1.
 #[repr(transparent)]
-struct SpsrEL1(InMemoryRegister<u64, SPSR_EL1::Register>);
+pub struct SpsrEL1(InMemoryRegister<u64, SPSR_EL1::Register>);
 
 /// The exception context as it is stored on the stack on exception entry.
 #[repr(C)]
-struct ExceptionContext {
+pub struct ExceptionContext {
     /// General Purpose Registers.
     gpr: [u64; 30],
 
@@ -34,14 +32,10 @@ struct ExceptionContext {
 }
 
 /// Wrapper struct for pretty printing ESR_EL1.
-struct EsrEL1;
-
-//--------------------------------------------------------------------------------------------------
-// Private Code
-//--------------------------------------------------------------------------------------------------
+pub struct EsrEL1;
 
 /// Prints verbose information about the exception and then panics.
-fn default_exception_handler(e: &ExceptionContext) {
+pub fn default_exception_handler(e: &mut ExceptionContext) {
     panic!(
         "\n\nCPU Exception!\n\
          FAR_EL1: {:#018x}\n\
@@ -60,7 +54,7 @@ fn default_exception_handler(e: &ExceptionContext) {
 #[no_mangle]
 #[linkage = "weak"]
 unsafe extern "C" fn current_el0_synchronous(e: &mut ExceptionContext) {
-    default_exception_handler(e);
+    EXCEPTION_HANDLERS.current_el0_synchronous.unwrap_or(&default_exception_handler)(e);
 }
 
 #[no_mangle]
@@ -240,195 +234,5 @@ pub fn current_privilege_level() -> (PrivilegeLevel, &'static str) {
         Some(CurrentEL::EL::Value::EL1) => (PrivilegeLevel::Kernel, "EL1"),
         Some(CurrentEL::EL::Value::EL0) => (PrivilegeLevel::User, "EL0"),
         _ => (PrivilegeLevel::Unknown, "Unknown"),
-    }
-}
-
-/// Init exception handling by setting the exception vector base address register.
-///
-/// # Safety
-///
-/// - Changes the HW state of the executing core.
-/// - The vector table and the symbol `__exception_vector_table_start` from the linker script must
-///   adhere to the alignment and size constraints demanded by the ARMv8-A Architecture Reference
-///   Manual.
-pub unsafe fn handling_init() {
-    // Provided by exception.S.
-    extern "Rust" {
-        static __exception_vector_start: UnsafeCell<()>;
-    }
-
-    VBAR_EL1.set(__exception_vector_start.get() as u64);
-
-    // Force VBAR update to complete before next instruction.
-    barrier::isb(barrier::SY);
-}
-
-pub mod masking {
-    use cortex_a::regs::{RegisterReadWrite, DAIF};
-    use register::LocalRegisterCopy;
-
-    pub mod daif_bits {
-        pub const DEBUG: u8 = 0b1000;
-        pub const SERROR: u8 = 0b0100;
-        pub const IRQ: u8 = 0b0010;
-        pub const FIQ: u8 = 0b0001;
-    }
-
-    /// Unmask debug interrupts (Watchpoint, Breakpoint, and Software Step exceptions) on the executing core.
-    ///
-    /// # Safety
-    ///
-    /// - Changes the HW state of the executing core.
-    #[inline(always)]
-    pub unsafe fn local_debug_unmask() {
-        // It is not needed to place an explicit instruction synchronization barrier after the `msr`.
-        // Quoting the Architecture Reference Manual for ARMv8-A, section C5.1.3:
-        //
-        // "Writes to PSTATE.{PAN, D, A, I, F} occur in program order without the need for additional
-        // synchronization."
-        #[rustfmt::skip]
-        asm!(
-            "msr DAIFClr, {arg}",
-            arg = const daif_bits::DEBUG,
-            options(nomem, nostack, preserves_flags)
-        );
-    }
-
-    /// Mask debug interrupts (Watchpoint, Breakpoint, and Software Step exceptions) on the executing core.
-    ///
-    /// # Safety
-    ///
-    /// - Changes the HW state of the executing core.
-    #[inline(always)]
-    pub unsafe fn local_debug_mask() {
-        #[rustfmt::skip]
-        asm!(
-            "msr DAIFSet, {arg}",
-            arg = const daif_bits::DEBUG,
-            options(nomem, nostack, preserves_flags)
-        );
-    }
-
-    /// Unmask SError interrupts on the executing core.
-    ///
-    /// # Safety
-    ///
-    /// - Changes the HW state of the executing core.
-    #[inline(always)]
-    pub unsafe fn local_serror_unmask() {
-        #[rustfmt::skip]
-        asm!(
-            "msr DAIFClr, {arg}",
-            arg = const daif_bits::SERROR,
-            options(nomem, nostack, preserves_flags)
-        );
-    }
-
-    /// Mask SError interrupts on the executing core.
-    ///
-    /// # Safety
-    ///
-    /// - Changes the HW state of the executing core.
-    #[inline(always)]
-    pub unsafe fn local_serror_mask() {
-        #[rustfmt::skip]
-        asm!(
-            "msr DAIFSet, {arg}",
-            arg = const daif_bits::SERROR,
-            options(nomem, nostack, preserves_flags)
-        );
-    }
-
-    /// Unmask IRQs on the executing core.
-    ///
-    /// # Safety
-    ///
-    /// - Changes the HW state of the executing core.
-    #[inline(always)]
-    pub unsafe fn local_irq_unmask() {
-        #[rustfmt::skip]
-        asm!(
-            "msr DAIFClr, {arg}",
-            arg = const daif_bits::IRQ,
-            options(nomem, nostack, preserves_flags)
-        );
-    }
-
-    /// Mask IRQs on the executing core.
-    ///
-    /// # Safety
-    ///
-    /// - Changes the HW state of the executing core.
-    #[inline(always)]
-    pub unsafe fn local_irq_mask() {
-        #[rustfmt::skip]
-        asm!(
-            "msr DAIFSet, {arg}",
-            arg = const daif_bits::IRQ,
-            options(nomem, nostack, preserves_flags)
-        );
-    }
-
-    /// Unmask FIQs on the executing core.
-    ///
-    /// # Safety
-    ///
-    /// - Changes the HW state of the executing core.
-    #[inline(always)]
-    pub unsafe fn local_fiq_unmask() {
-        #[rustfmt::skip]
-        asm!(
-            "msr DAIFClr, {arg}",
-            arg = const daif_bits::FIQ,
-            options(nomem, nostack, preserves_flags)
-        );
-    }
-
-    /// Mask FIQs on the executing core.
-    ///
-    /// # Safety
-    ///
-    /// - Changes the HW state of the executing core.
-    #[inline(always)]
-    pub unsafe fn local_fiq_mask() {
-        #[rustfmt::skip]
-        asm!(
-            "msr DAIFSet, {arg}",
-            arg = const daif_bits::FIQ,
-            options(nomem, nostack, preserves_flags)
-        );
-    }
-
-    /// Contains the interrupt mask state
-    pub struct DaifState(LocalRegisterCopy<u64, DAIF::Register>);
-
-    impl core::fmt::Debug for DaifState {
-        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-            writeln!(f, "Exception handling state:")?;
-            writeln!(f, "    Debug  (D): {}", self.0.is_set(DAIF::D))?;
-            writeln!(f, "    SError (A): {}", self.0.is_set(DAIF::A))?;
-            writeln!(f, "    IRQ    (I): {}", self.0.is_set(DAIF::I))?;
-            writeln!(f, "    FIQ    (F): {}", self.0.is_set(DAIF::F))
-        }
-    }
-
-    /// Returns the current mask state of the executing core
-    ///
-    /// # Safety
-    ///
-    /// - Changes the HW state of the executing core.
-    #[inline(always)]
-    pub unsafe fn local_mask_save() -> DaifState {
-        DaifState(DAIF.extract())
-    }
-
-    /// Restores saved interrupt mask state on the executing core
-    ///
-    /// # Safety
-    ///
-    /// - Changes the HW state of the executing core.
-    #[inline(always)]
-    pub unsafe fn local_mask_restore(state: DaifState) {
-        DAIF.set(state.0.get())
     }
 }

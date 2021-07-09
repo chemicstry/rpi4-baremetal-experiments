@@ -17,7 +17,9 @@ impl Gicc {
         self.gicc.ctlr.write(CTLR::Enable::CLEAR);
     }
 
-    pub fn set_priority(&mut self, priority: u8) {
+    /// Provides an interrupt priority filter. Only interrupts with higher priority than the given value
+    /// will be signaled to the processor
+    pub fn priority_mask(&mut self, priority: u8) {
         self.gicc.pmr.write(PMR::Priority.val(priority as u32));
     }
 
