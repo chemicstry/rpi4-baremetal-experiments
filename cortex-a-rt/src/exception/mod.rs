@@ -3,7 +3,6 @@ use core::cell::UnsafeCell;
 use cortex_a::{barrier, regs::*};
 
 pub mod masking;
-pub mod handlers;
 pub mod exception;
 
 /// Init exception handling by setting the exception vector base address register.

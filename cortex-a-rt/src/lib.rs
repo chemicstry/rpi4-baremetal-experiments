@@ -13,7 +13,7 @@ pub mod memory;
 pub mod entry {
     use cortex_a::{asm, regs::*};
 
-    use crate::{exception, memory};
+    use crate::memory;
 
     // Initial boot handled by assembly
     global_asm!(include_str!("boot.s"));
@@ -74,7 +74,6 @@ pub mod entry {
         }
 
         memory::zero_bss();
-        exception::han();
 
         main();
     }

@@ -6,8 +6,6 @@ use core::fmt;
 use cortex_a::regs::*;
 use register::InMemoryRegister;
 
-use super::handlers::EXCEPTION_HANDLERS;
-
 // Assembly counterpart to this file.
 global_asm!(include_str!("exception.s"));
 
@@ -54,7 +52,7 @@ pub fn default_exception_handler(e: &mut ExceptionContext) {
 #[no_mangle]
 #[linkage = "weak"]
 unsafe extern "C" fn current_el0_synchronous(e: &mut ExceptionContext) {
-    EXCEPTION_HANDLERS.current_el0_synchronous.unwrap_or(&default_exception_handler)(e);
+    default_exception_handler(e);
 }
 
 #[no_mangle]
