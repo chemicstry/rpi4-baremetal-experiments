@@ -2,12 +2,21 @@
 //
 // Copyright (c) 2018-2021 Andre Richter <andre.o.richter@gmail.com>
 
-use core::fmt;
+use core::{cell::UnsafeCell, fmt};
 use cortex_a::regs::*;
 use register::InMemoryRegister;
 
 // Assembly counterpart to this file.
 global_asm!(include_str!("exception.s"));
+
+// Provided by exception.S.
+extern "Rust" {
+    static __exception_vector_start: UnsafeCell<()>;
+}
+
+pub fn exception_vector_start() -> usize {
+    unsafe { __exception_vector_start.get() as usize }
+}
 
 /// Wrapper struct for memory copy of SPSR_EL1.
 #[repr(transparent)]

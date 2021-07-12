@@ -1,4 +1,5 @@
 #![feature(global_asm)]
+#![feature(const_panic)]
 #![feature(linkage)]
 #![feature(asm)]
 #![no_std]
@@ -8,12 +9,13 @@ use register::Field;
 
 pub mod exception;
 pub mod memory;
+pub mod mmu;
 
 #[cfg(feature = "entry")]
 pub mod entry {
     use cortex_a::{asm, regs::*};
 
-    use crate::memory;
+    use crate::{exception, memory, mmu};
 
     // Initial boot handled by assembly
     global_asm!(include_str!("boot.s"));
@@ -74,6 +76,10 @@ pub mod entry {
         }
 
         memory::zero_bss();
+        exception::handling_init();
+        mmu::mmu()
+            .enable_mmu_and_caching(&mmu::layout::default::default_layout())
+            .expect("Failed to initialize MMU");
 
         main();
     }

@@ -1,9 +1,7 @@
-use core::cell::UnsafeCell;
-
 use cortex_a::{barrier, regs::*};
 
-pub mod masking;
 pub mod exception;
+pub mod masking;
 
 /// Init exception handling by setting the exception vector base address register.
 ///
@@ -14,12 +12,7 @@ pub mod exception;
 ///   adhere to the alignment and size constraints demanded by the ARMv8-A Architecture Reference
 ///   Manual.
 pub unsafe fn handling_init() {
-    // Provided by exception.S.
-    extern "Rust" {
-        static __exception_vector_start: UnsafeCell<()>;
-    }
-
-    VBAR_EL1.set(__exception_vector_start.get() as u64);
+    VBAR_EL1.set(exception::exception_vector_start() as u64);
 
     // Force VBAR update to complete before next instruction.
     barrier::isb(barrier::SY);
