@@ -1,10 +1,12 @@
-# RPi-RTIC
+# RPi4 baremetal experiments
 
-This is a monorepo for [RTIC](http://rtic.rs) implementation on Raspberry Pi 4.
+This repository contains baremetal experiments on Raspberry Pi 4, which was part of my Master's thesis [Real-Time Interrupt-driven Concurrency (RTIC) for Modern Application Processors](https://essay.utwente.nl/89253/) at University of Twente.
 
-Repository is set up as a cargo workspace containing multiple crates to simplify development. They are not yet released on crates.io
+I intended to develop and release a set of universal crates (similar to other MCU PAC and HAL crates), which could be used for writing baremetal apps on RPi4, but the project scope turned out to be much larger than I expected. GIC, MMU, multiple cores and other CPU features add a lot of complexity and make most of the code unsafe, where a large framework is needed to wrap everything under a memory safe API. I'm no longer interested in developing this further, however, someone might find this repository useful in their endeavors. Feel free to fork it or ask questions in the issues.
 
 ## Crates
+
+Repository is set up as a cargo workspace containing multiple crates to simplify development.
 
 Summary:
 - [rpi-pac](rpi-pac/) (Raspberry Peripheral Access Crate)
